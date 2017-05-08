@@ -1,2 +1,2 @@
-This is a simple test.
-Nothing can be simpler than this.
+This is just a test.
+A test is what it is.
