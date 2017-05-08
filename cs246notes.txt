@@ -1,0 +1,215 @@
+CS246
+
+USEFUL: w3m https://marmoset.student.cs.uwaterloo.ca
+        ssh y27duan@linux.student.cs.uwaterloo.ca
+
+Lecture 1:
+
+Prof: Numer
+
+Terminal Shell 2 weeks
+
+C++ 10 weeks
+
+A “shell” is an interface to the OS(operating system).
+
+2 kinds of shells: Graphic and Command Line
+
+Graphic : intuitive and easy yet limited in functionality!!
+
+Command Line : type command on a “command prompt”,
+                             not limited by functionality,
+                             yet steep learning curve.
+
+Linux Shell: csh ksh turbo c shell(tcsh) Bowine Again Shell(bash)
+
+$ echo $0 // this test if you are using bash.
+
+Linux File System: 
+- contains files
+- some files can contain other files(directory)
+- root dir: /
+- PATH: the location of a file
+- “/” has two meanings: root or separation
+- files can be hidden (configuration)
+
+Command:
+- $> to indicate command prompt
+- echo $0: what kind of shell
+- ls : listing
+- ls -a : (command argument) list all files
+- pwd : present working dir
+- cd … : change dir
+- cd /dir1/dir2/dir3 : (use a path) this changes the dir to the end
+- cd .. : to higher level
+- cat dir1/dir2/dir3 : prints content of files
+- cat : repeat whatever you say
+- ssh : secure shell 
+- scp : secure copy (scp y27duan@…: ~/cs246/a0.pdf .)
+- echo : prints arguments to stdout
+- exit : exit the current shell
+- alias : substitution string for command name (alias l=‘ls’) remember to always use quotes!!
+- type : alias-reverse
+- type -p : only show the command file-name
+￼
+- cp : copy files; with -r option, copy directories(its better to use -i)
+- mv : move files or directories to another location(use -i)
+- rm : remove(delete) files, use -r to remove directories !!CAREFUL!! No recovering
+- time : execute a command and print a time summary
+- sh/bash/csh/tcsh : start subshell
+- more/less : print files separately
+- lp/lpstat/lprm : add query and remove files from the printer queues
+- cmp/diff : compare 2 files and print differences, returns 0 if equal
+- head [-args] : prints out the first ‘arg’ lines (head -20 test.txt)
+- .profile !!!! Very useful
+- command arg1 arg2 > out.txt
+- (control c : stop)
+- (control -D means END OF FILE)
+- (absolute path: the one that starts with the root dir.)
+- (relative path: the one that stats with the current dir.)
+
+Output Redirection: redirect the output of a program/command of a file.
+
+git.uwaterloo.ca
+
+to get g++ at least version 5:
+Checkup: HOMEBREW 
+
+
+Lecture 2:
+
+Output Redirection: redirects output to a file
+
+$ command [args] > filename
+
+Input Redirection: direct contents of a file into a program.
+
+$ command [args] < filename
+
+E.G. 
+
+$ cat sample.txt
+=> sample.txt is an argument to cat
+=> cat opens the file and reads it
+
+$ cat < sample.txt
+=> there is no argument!!
+=> the shell opens file sample.txt and sends the content to cat
+
+E.G.
+
+$ wc test.txt
+=> 1 2 3 test.txt
+
+$ wc < test.txt
+=> 1 2 3
+# Here the command wc does not know about which file it is reading
+
+Input/Output Streams:
+
+stdin -> process -> stdout
+
+stdin: default: keyboard
+           use < to change to file
+
+stdout: default: screen
+              use > to change to file
+
+stderr: default: screen
+             use 2> to change to file
+
+E.G.
+
+$ cat < in.txt > out.txt 2> err.txt
+# this reads from in.txt output to out.txt and produce error to err.txt if there is an error.
+
+!! use >> to append not overwrite !!
+
+E.G.
+
+command > out.txt 2 > &1
+# this redirect both stdout and stderr to out.txt
+
+WILDCARD MATCHING:
+
+E.G.
+
+$ cat *.txt
+=> cat abc.txt def.txt
+#        globbing parttern
+# this do the command to all the files end with .txt
+# The shell choose all the file in pwd that satisfy this pattern
+
+PIPES:
+
+This directly connect the output of a process to another input process!!!
+
+| This is the pipe symbol!!!!
+
+head -20 sample.txt | wc -w
+
+E.G.
+
+suppose files words*.txt contain list of words, one per line. Print a duplicate free list of all words in word*.txt
+
+cat words*.txt | sort | uniq
+
+USE THE OUTPUT AS AN ARGUMENT:
+
+E.G.
+
+$ echo “Today is $(date) and I am $(whoami).”
+# $(…) is called embedding command
+
+!!!!!!!!
+
+$ echo “$(date)”
+=> prints out the date
+
+$ echo ‘$(date)’
+=> prints out $(date)
+
+!!!!!!!!!
+
+‘…’ prevents embedding commands from executing!
+
+Pattern Matching:
+
+egrep : extended global regular expression print
+!!! This is case sensitive !!!
+
+$ egrep [regular expression pattern] [files you want to search]
+=> this prints every line in the line/lines that matches the pattern
+
+E.G.
+
+$ egrep thou sample.txt
+=> two lines that contains the pattern “thou”
+=> thousand…
+      thought…
+
+we can use the logic symbol ‘or’(‘|’) in our expression, but we need to use a string!!!
+
+So always use double quotes in egrep!!
+
+E.G.
+
+$ egrep “cs246|CS246” index.shtml | wc -l
+$ egrep (cs|CS)246 … # this is the same 
+$ egrep (C|S)(c|s)246 … # this is NOT the same
+
+SYNTAX:
+# [abc] : is short hand for a|b|c
+# [^abc] : one character not in the set
+# ? : 0 or 1 of the previous subexpression “cs ?246” 
+          — this means “cs246” or “cs 246”
+# + : 1 or more of the previous subexpression
+# * : 0 or more 
+# . : match any one character
+# .* : match 0 or more of any charactors
+
+
+
+
+
+
