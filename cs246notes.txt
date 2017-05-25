@@ -1,7 +1,9 @@
 CS246
 
 USEFUL: w3m https://marmoset.student.cs.uwaterloo.ca
-        ssh y27duan@linux.student.cs.uwaterloo.ca
+                 ssh y27duan@linux.student.cs.uwaterloo.ca
+                 source /u/cs246/setup
+                 marmoset_submit cs246 ..
 
 Lecture 1:
 
@@ -51,7 +53,7 @@ Command:
 - alias : substitution string for command name (alias l=‘ls’) remember to always use quotes!!
 - type : alias-reverse
 - type -p : only show the command file-name
-￼
+
 - cp : copy files; with -r option, copy directories(its better to use -i)
 - mv : move files or directories to another location(use -i)
 - rm : remove(delete) files, use -r to remove directories !!CAREFUL!! No recovering
@@ -207,9 +209,691 @@ SYNTAX:
 # * : 0 or more 
 # . : match any one character
 # .* : match 0 or more of any charactors
+# [a-z] : 1 character from a to z
+# \ : The character after this will be read as char
+
+
+- To insist that lines matched must begin with some pattern, use ^.
+- To insist that there is no character after the pattern has matched on a line, use $
+E.G. 
+“^cs.*246”
+“cs.*246$”
+
+Fetch lines of even length:
+
+$ egrep “^(..)*$” filename
+
+List all files in the  current directory whose name contains exactly one “a”:
+
+$ ls | egrep “^[^a]*a[^a]*$”
+
+File Permissions:
+
+- ls -l : long listing
+
+$ ls -l
+=> -rwxr-xr-x 1 Dennis Staff 102 8 May 00:00 tut
+:::::::9 bits dictate file permissions
+:::::::::::::::::::::::symbolic links
+user, group, size, last modified, filename
+
+ rwx  r-x  r—
+ user bits: owner permission
+         group bits: permissions for users in the same group
+                others bits: all other users
+
+r: read
+w: write
+x: execute
+
+For directories, x means if one can get into the directory.
+
+- Only the owner can modify permissions
+- The command is: chmod
+- $ chmod mode file(s)
+- !! mode is made of 3 components:
+- ownership | operator | permissions
+- ownership: u, g, o or a for all
+- operator +, -, =
+- permissions: r, w, x
+
+E.G.
+
+$ chmod o+r file.txt
+$ chmod a=rx *
+
+Shell variables:
+
+$ x=1 
+!! no space !!
+
+$ y=“Hello World!”
+!! all shell variables are strings !!
+
+$ echo $x
+=> 1
+
+$ echo ${x}
+=> 1
+
+$ dir=~/cs246
+$ echo $dir
+=> /User/Dennis/cs246
+
+$ echo “$dir”
+=> User/Dennis/cs246
+
+$ echo ‘$dir’
+=> $dir
+
+!! when using single quotes, this is seen as a string !!
+
+Global Predefined Variables:
+
+$?
+
+$PATH: This is a collection to paths to directories separated by “:”
+
+!! When executing a command, the terminal search for the command in the $PATH dirs !!
+
+Shell Scripts:
+
+Text file containing a sequence of linux commands/programs execute as a program.
+
+E.G.
+
+File: basic
+
+#!/bin/bash
+whoami
+pwd
+date
+
+File End
+
+!! When using the scripts, it is needed to specify the path to the scripts !!
+
+$ ./basic
+=> Dennis
+=> /User/Dennis/cs246
+=> Tue 9 May…
+
+!! Command Line Arguments to a script are accessible within the script using $1, $2… !!
+
+E.G.
+
+File: AAA
+
+#!/bin/bash
+egrep “^$1$” /user/share/dict/words
+
+File End
+
+$ ./AAA hello
+=> hello
+$ ./AAA dwg
+=> 
+
+Good Password
+- is the given word a good password?
+- Not a good password if in the dictionary.
+
+#!/bin/bash
+
+egrep “^$1$” /usr/share/dict/words > /dev/null
+
+!! Every command/process sets a status code ($?) !!
+
+Linux Convention: 
+0 -success 
+non-zero -failure
+
+For egrep:
+0 -success
+1 -failure
+
+How to compare $? with 0 or 1?
+
+Test Program:
+
+[ $? -eq 0 ]
+!!This set the current status quote ($?) to 0 if success!!
+
+- ${#} is the number of arguments to the script.
+- $0 : the string the user typed before the first argument.(The script name)
+
+exit 1 : exit script because of failure!!
+exit 0 (exit) : just exit (exit because of success)
+
+TUT2:
+
+- ls -al : long list and all the files
+- ls -h : humanly readable
+- uniq : remove consecutive duplicates
+- uniq -c : print counts of consecutive duplicates
+- sort : sort the lines(ASCII order)
+- sort -n : sort numerically
+- head/tail : print first/last 10 lines to stdout
+- head/tail -5 : print the first/last 5 lines
+- sort -k2r : sort by the second key and reverse it
+- sort -k1n -k2r : first sort by the first key numerically and the sort by the second key reversed
+- 
+
+E.G.
+
+!! echo “ERROR” 1>&2 !!
+!! ./printer &> out !! # This will put both output to a file out!!
+!! ./printer > /dev/null !! use blackhole
+
+$() can be nested
+‘’ cannot be nested
+“” only suppress globbing paterns
+
+TUT ENDS
+
+If $8 is used and there is no 8th argument, $8 will be a empty string.
+
+If Statement:
+
+E.G.
+
+if [$? -eq 0]; then
+  echo Not a good password
+else 
+  echo Maybe a good password
+fi
+
+Syntax: 
+if [condition]; then
+  …
+elif [condition]; then
+  …
+else 
+   …
+fi
+
+Conditions:
+- -eq, -ne, -le, -lt
+- [-e file.txt]
+- -a(and), -o(or), !(not)
+- =, !=
+
+While loop:
+
+E.G.
+
+File:
+
+#!/bin/bash
+
+x=1;
+while [$x -le $1]; do
+  echo $x
+  x=$((x+1)) # When assigning, no “$” is needed.
+done
+
+For Loop:
+
+for i in a b c d; do echo $i; done
+
+E.G.
+
+Rename all .C files to .cc:
+
+for name in *.C; do
+  mv ${name} ${name%C}cc
+done
+
+How to rename:
+We can use $ mv hello.C hello.cc
+
+file = hello.C
+$ mv $file ${file%C}cc # This will change .C to .cc
+
+file = 123Hello
+ ${file#123} # This will remove 123
+
+????? */.c ????? subdirectories ???????
+!!! For terminal “/n” “/tab” are treated as whitespace !!!!!!!
+
+E.G.
+
+Count the number of occurrences of $1 in the file $2:
+
+count=0
+for word in $(cat $2) ; do
+  if [$word = “$1”]; then # double quotes prevents error
+    count = $count + 1
+  fi
+done
+echo $count
+
+!!! ALWAYS USE DOUBLE QUOTES IN ANY USER INPUT !!!
+
+E.G.
+
+Do check out script: payday
+
+$ cal | awk ‘ {print $6} ’ | egrep [0-9] | tail -1
+
+$ cal June 2017 | awk ‘ {print $6} ’ | egrep [0-9] | tail -1
+
+Module 2:
+C++:
+
+Bjaine Stroustrup
+
+C++ : C with classes
+C++99 : most stable
+C++03 : used to teach
+C++11 : starts every 3 years
+C++14 : ours version
+
+Most C programs are valid C++ programs
+
+In C:
+
+#include <stdio.h>
+
+int main(void) {
+	printf(“Hello World!\n”);
+	return 0;
+}
+
+In C++:
+
+#include <iostream>
+using namespace std;
+
+int main() {
+	cout <<“Hello World!”<<endl;
+	return 0;
+}
+
+DIFFERENCE:
+1. In C, we include stdio.h to use printf to output to stdout.
+2. Using printf is not allowed in CS246.
+3. In C++, we include <iostream>
+4. std::cout <<data1<<data2;
+5. std::cout <<endl;
+6. To compile the source file, use the command g++-5
+
+$ g++-5 -std=c++14 hello.cc
+=> # by default, produces file a.out
+$ ./a.out
+=> runs the program
+
+g++14 hello.cc -0 myprogram
+
+cout:
+
+When we include <iostream> we are importing three stream variables:
+- cout (type ostream) : write to stdout;
+- cerr (type ostream) : write to stderr;
+- ein (type istream) : read from stdin;
+
+C++ also provides: 
+- output operator : << ;
+- input operator : >> ;
+
+E.G. read 2 int and add them up
+
+#include <iostream>
+using namespace std;
+
+int main() {
+	int x, y;
+	cin >> x >> y;
+	cout << x+y << endl;
+}
 
 
 
+!!! cin skips white spaces :
+- it starts at first non-whitespace char until the first whitespace is hit.
+- if a read fails (because of non-int) the variable is left unchanged but the program continues.
+- if a read fails due to EOF, the program still continues!!
+- !! wherever we do a read, it is a good idea to check if it succeeded !!
+- if the read fails, then the expression cin.fail() is true;
+- if the read fails due to EOF, then cin.fail() and cin.eof() are true!!
+
+E.G.  Read all ints from stdin and echo them to stdout. Stop when a read fails.
+
+int main() {
+	int i,
+	while(true) {
+		cin>>i;
+		if (cin.fail()) break;
+		cout<<i<<endl;
+	}
+}
+
+There is an automatic conversion from can to bool(implicit conversion)!!
+
+!! cin is true whenever the cin.fail() is false!!
+
+We can rewrite the previous code!!
+
+int main() {
+	int i;
+	while(true) { 		cin>>i;
+		if(!cin) break;
+		cout <<i<<endl;
+	}
+}
+
+cin >> i; // This is a single expression. It is binary!!
+
+!! it produces a value !! which is “cin” !!
+
+so when using 
+
+      cin >> x >> y
+=> cin >> y
+=> cin // which we throw away!!
+
+!! If a read fails, all the following reads fail(unless we do something) !!
+
+We can rewrite the previous code!!
+
+int main() {
+	int i;
+	while(true) {
+		if(!(cin>>i)) break;
+		cout <<i<<endl;
+	}
+}
+
+==>
+
+int main() {
+	int i;
+	while(cin>>i) {
+		 cout << i << endl;
+	}
+}
+
+E.G. Read all ints and echo to stdout skip non-ints End at EOF.
+
+int main() {
+	int i;
+	while(true) {
+		if(cin >> i) {
+			cout << i << endl;
+		}
+		else {
+			if (cin.eof()) break;
+			cin.clear();
+			cin.ignore;
+		}
+	}
+}
+
+If a dead fails, all future reads fail.
+!! The offending char will be read again and again if no con.ignore() is used !! 
+- use cin.clear() to acknowledge the failure;
+- use cin.ignore() to ignore the “next” character;
+
+C++ actually has a string type
+
+# include <string>
+
+int main(){
+	string s;
+	cin >> s;
+	cout << s << endl;
+}
+
+!!
+=> Hello world!
+=> Hello // cin will read from first non-whitespace char until it reaches another whitespace.
+
+To read an entire line:
+getline(cin, s);
+This will keep reading until it hits a newline.
+
+In C, we will need to remember format specifiers, while in C++ the declared type is enough for cin.
+
+In C, we can use format specifiers to change how input was read or how output was produced. In C++ the process is different!
+
+In C++, we can do the same or more using IO manipulators.
+
+we must include <iomanip>
+
+int x=95;
+cout << x;
+cout << hex; // from this on, we print hexidecimal
+cout << x;
+cout << dec; // from this on, we print decimal
+
+see <iomanip>
+- showpoint
+- setprecision
+- boolalpha
+- skipws
+- noskipws 
+
+TUT2:
+
+program arg1…argn < input > output
+
+- Bash variables
+
+$ var=42
+$ echo var
+=> 42
+
+$ echo ${var%2}
+=> 4
+
+$ “wc -l”
+=> error
+
+- Exit code
+
+exit 0 (in bash shell)
+
+0 : no error
+1-255 : some error
+
+- Loops, ifs, test
+
+1)
+if [cond1]; then
+	…
+elif [cond2]; then
+	…
+else
+	…
+fi
+
+2)
+for var in <words>; do
+	…
+done
+
+3)
+while [cond]; do
+	…
+done
+
+$ seq 0 10
+=> 0 1 2 3 4 5 6 … 10
+$ {0..2}
+=> 0 1 2
+
+Test: [
+
+$ [ 2 -le 3 ]; echo $?
+=> 0
+
+- Bash scripting
+
+use #!/bin/bash
+$# number of arguments
+$@ all args
 
 
 
+!! In bash scripts, all variables are execution scopes !!
+
+!! Test does not guarantee correctness !!
+
+- Testing
+
+Black-box testing
+
+White-box testing (Unit testing)
+
+What should be tested? 
+- General case
+- Boundary
+- Equivalence 
+- Corner/ Weird cases
+
+
+$ bash -x
+=> prints out all the commands!!
+
+TUT ENDS
+
+MORE IO/ Short topics
+
+The some “stream abstraction” can apply to other forms of data
+-> read/write to files
+#include <fstream>
+- ifstream : read from a file
+- ofstream :write to a file
+
+E.G.
+
+int main() {
+	ifstream filesteam{“myfile.txt”};
+	sting s;
+	while (filestream >> s) {
+		cout << s << endl;
+	}
+}
+
+You can do everything with a ifstream variable that you could do with cin(istream)
+!! ofstream variable are similar to cout(ostream) !!
+
+We can treat a string as a source of data
+
+#include <sstream>
+- istringstream_ input_ read from a string
+- ostringstram_ output_ write to a string
+
+int lo = 2, hi = 5;
+
+io/buildstring.cc
+ostringstream os;
+os << “Enter a number between ” << hi << “and ” << lo << endl;
+string s = os.str();
+cout s;
+
+E.G.
+
+insisting on the user to enter a number
+
+int main() {
+	int num;
+	while(true) {
+		cout << “Enter a number” << endl;
+		string s;
+		cin >> s;
+		istringstream ss{s};
+		if (ss>num) break;
+ 	}
+}
+
+String:
+
+In C, we used char arrays to  store a string
+
+In C++, there is a string type
+- include <string>
+- automatically manage size!!
+
+stirng s = “hello”
+
+
+!!! C string is different from C++ !!!
+
+[在这里添加图片]
+
+Default Arguments
+
+void pritfile(string name=“myfile.txt”) {
+	string s;
+	ifstream filestream{name};
+	while (filestream >> s) {
+		cout << s << endl;
+	}
+}
+
+!! name=“myfile.txt” is just a default argument, you can always pass on a perimeter to change the default.
+
+You cannot follow a parameter with a default value with one that does not have a default value.
+
+That is, parameter with a default value must occur last!!!
+
+E.G.
+
+void - test(int num=0, string str); NOT VALID
+
+void test(int num=0, string str=“bla”); VALID
+
+If you are going to leave out an argument it must be the last (or the last n).
+
+test(5, “blabla”); VALID
+test(5); VALID
+test(); VALID
+test(“blabla”); NOT VALID
+!!! test(,”blabla”); NOT VALID !!!
+
+If our program implements 
+	void test(int num=0, string str=“ ”);
+We cannot implement
+	void test();
+	void test(int);
+	void test(int, string);
+
+Function Overloading
+It is legal in C++ to create a function with the same name as long as there is a difference i nthe number and/or types of parameters
+
+E.G.
+int neg(int a) {return -a};
+
+bool neg(int a) {return !a};
+
+int a=21;
+int b=3;
+a = a>>b (bit shift)
+
+cin >> x;
+
+How the complier tell the difference:
+
+The type of variables
+
+struct:
+
+C:
+
+struct Node {
+	int data;
+	struct Node * next;
+};
+
+struct Node n ={5, NULL}
+
+C++:
+
+struct Node {
+	int data;
+	Node * next;
+};
+
+Node n{5, nullptr}
+# This is uniform initialization!!
