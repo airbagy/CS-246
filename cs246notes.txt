@@ -530,7 +530,7 @@ cout:
 When we include <iostream> we are importing three stream variables:
 - cout (type ostream) : write to stdout;
 - cerr (type ostream) : write to stderr;
-- ein (type istream) : read from stdin;
+- cin (type istream) : read from stdin;
 
 C++ also provides: 
 - output operator : << ;
@@ -562,9 +562,9 @@ E.G.  Read all ints from stdin and echo them to stdout. Stop when a read fails.
 int main() {
 	int i,
 	while(true) {
-		cin>>i;
+		cin >> i;
 		if (cin.fail()) break;
-		cout<<i<<endl;
+		cout << i << endl;
 	}
 }
 
@@ -897,3 +897,201 @@ struct Node {
 
 Node n{5, nullptr}
 # This is uniform initialization!!
+
+TUT:
+
+- C++ style strings
+
+#include <string>
+stirng s = “abc”;
+// We can do:
+s[1];
+s + “abc”;
+==, !=, >, <;
+s.length(), s.clear(), s.substr(), s.find(…), 
+s.c-str() : returens a const char * of C++ string
+
+- streams
+
+istream : 
+	cin >> x;
+	cin.eof();
+	cin.fail() : (check eof after fail);
+	cin.clear() : set fail bit to false;
+	cin.ignore() : read next char and discard it;
+	
+	subtype: ifstream, istringstream
+		ifstream ifs{filename};  (a new syntax in c++ 11)
+		
+
+ostream:
+	cout << x;
+	ostringstream oss;
+	oss.str() : give C++ syle string inside OSS.
+		
+		ofstream ofs{filename}; 
+		
+
+
+- parameters
+
+	int f(int x, int y);
+	bool f(int x);
+
+	name + number and type of arguments = signature
+
+TUT ENDS
+
+void inc(int n) {
+	n = n + 1;
+} 
+
+int x = 5;
+inc(x);
+cout << x << endl; // prints out 5
+
+!! to increment x, we need to pass by pointer !!
+
+void inc(int *n) { 	*n += 1;
+}
+int x = 5;
+inc(&x);
+…
+
+!! cin >> x;
+!! operator >> (cin, x);
+!! who is the value of x changed by this function??
+
+C++ has a different “pointer-like” type 
+
+ref:
+
+Lvaue Ref:
+	int y = 10;
+	int &z = y; // z is a lvalue reference to y. (& is part of the declaration.) 
+
+A lvalue ref acts as a constant pointer with automatic dereferencing.
+
+z will always points to y!! z is a constant ref to y!!
+
+	z = 15; // updates y to 15 (automatic deref)
+	int *p = &z // p points to y (automatic deref)
+	int *&rp = p; (rp is a pointer to a ref)
+	int &&z1 = z;
+
+- z is a alias of y (other name)
+- We cannot create a pointer to a ref.
+- cannot leave reference uninitialized.
+- Must initialize a reference to a lvalue.
+- But we can create a ref to  a pointer.
+- cannot create a ref to a ref
+- cannot create a array of refs.
+- the size of ref is uncertain!! (just a different name)
+
+lvalue vs rvalue:
+- lvalue refers to a storage location.
+- anything that has a address.
+- local vars are lvalues.
+
+- rvalue refers to computed values
+- eg. x + y
+
+illegal : int &x = 5; 
+		  int &z = x + y;
+
+Ways of using refs:
+- pass by ref
+eg. 
+	void inc(int &n) {
+		n = n + 1;
+	}
+	int x = 5;
+	inc(x);
+
+Back to: 
+	cin >> x;
+	operator >> (cin, x);
+!! This is passed by reference !!
+
+eg.
+	istream &operator >> (stream &in, int &n) {…}
+!! why is the first argument passed by ref?
+!! streams cannot be copied !!
+
+!! why does operator>> return stream?
+!! this allows chaining !!
+!! returning by value would return a copy !!
+
+Pass by value vs Pass by ref
+
+	struct ReallyBig{…};
+	void f(ReallyBig rb) {…};
+
+	ReallyBig bd = …
+	f(db); // expensive;
+
+If we want to avoid the copy, we can use pointer or ref.
+
+eg.
+	void g(ReallyBig *rb) {…};
+	g(&db);
+
+	void h(ReallyBig &rb) {…};
+	h(db);
+
+	void g(const ReallyBig *rb) {…}; (or ReallyBig const *rb)
+	g(&db);
+
+Advice: Always pass by reference to a const unless there is a good reason not to.
+- no copy so efficient
+- use const to prevent change to the original value
+
+Exceptions to the rule:
+	void f(int &x) {…}
+	void g(const int &x) {…}
+illegal: f(5) f(x + y)
+!! legal: g(5) g(x + y) !! (because we promised not to change the dereferenced value) !!
+
+Always use ref!!
+
+Dynamic/heap allocation:
+
+	int *p = malloc(length *struct);
+	free(p);
+
+Do not use malloc in C++
+
+	struct Node {
+		int data;
+		Node *next;
+	}
+
+we use: new and delete
+	Node *np = new Node;(type aware)
+	delete np;
+
+	void f() {
+		Node n;
+		Node *np = newNode;
+	}
+
+!! np is in the stack !!
+
+Heap allocated memory continues to live beyond the scope of the variable pointing to the memory !! (memory leak)
+
+We get 0 on tests if we have memory leak!! 
+
+To allocate memory of an array;
+
+This is how we do it:
+	Node *np = new Node[10];
+	delete [10] np;
+
+	Node *getMeANode(){
+		Node n;
+		return *n; // this a dangling pointer
+	}
+
+
+
+
