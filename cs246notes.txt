@@ -60,7 +60,7 @@ Command:
 - time : execute a command and print a time summary
 - sh/bash/csh/tcsh : start subshell
 - more/less : print files separately
-- lp/lpstat/lprm : add query and remove files from the printer queues
+- lp/lpstat/lprm : add query and re35move files from the printer queues
 - cmp/diff : compare 2 files and print differences, returns 0 if equal
 - head [-args] : prints out the first ‘arg’ lines (head -20 test.txt)
 - .profile !!!! Very useful
@@ -129,7 +129,7 @@ $ cat < in.txt > out.txt 2> err.txt
 
 E.G.
 
-command > out.txt 2 > &1
+command > out.txt 2> &1
 # this redirect both stdout and stderr to out.txt
 
 WILDCARD MATCHING:
@@ -775,14 +775,14 @@ int main() {
 	}
 }
 
-You can do everything with a ifstream variable that you could do with cin(istream)
+You can do everything with a ifstream variable that you could do with cin (istream)
 !! ofstream variable are similar to cout(ostream) !!
 
 We can treat a string as a source of data
 
 #include <sstream>
 - istringstream_ input_ read from a string
-- ostringstram_ output_ write to a string
+- ostringstream_ output_ write to a string
 
 int lo = 2, hi = 5;
 
@@ -824,7 +824,7 @@ stirng s = “hello”
 
 Default Arguments
 
-void pritfile(string name=“myfile.txt”) {
+void printfile(string name=“myfile.txt”) {
 	string s;
 	ifstream filestream{name};
 	while (filestream >> s) {
@@ -860,12 +860,12 @@ We cannot implement
 	void test(int, string);
 
 Function Overloading
-It is legal in C++ to create a function with the same name as long as there is a difference i nthe number and/or types of parameters
+It is legal in C++ to create a function with the same name as long as there is a difference i nth number and/or types of parameters
 
 E.G.
 int neg(int a) {return -a};
 
-bool neg(int a) {return !a};
+bool neg(bool a) {return !a};
 
 int a=21;
 int b=3;
@@ -976,7 +976,7 @@ z will always points to y!! z is a constant ref to y!!
 
 	z = 15; // updates y to 15 (automatic deref)
 	int *p = &z // p points to y (automatic deref)
-	int *&rp = p; (rp is a pointer to a ref)
+	int *&rp = p; (rp is a ref to a pointer)
 	int &&z1 = z;
 
 - z is a alias of y (other name)
@@ -1072,7 +1072,7 @@ we use: new and delete
 
 	void f() {
 		Node n;
-		Node *np = newNode;
+		Node *np = new Node;
 	}
 
 !! np is in the stack !!
@@ -1093,5 +1093,1206 @@ This is how we do it:
 	}
 
 
+Operator:
 
+<<, >>, + : different meanings.
+
+In C++, we can give meaning to C++ operators for user defined types.
+
+Eg1.
+
+Struct Vec {
+	int x, y;
+};
+
+Vec v1{1, 2};
+Vec v2{3, 4};
+Vec v3 = v1 + v2; // This will not work.
+Vec v4 = 3 * v1; // This will not work.
+Vec v5 = v1 * 3; // This will not work.
+
+Vec operator+(const Vec &lhs, const Vec &rhs) {
+	Vec v{lhs.x + rhs.x, lhs.y + rhs.y};
+	return v;
+}
+
+Vec operator*(int k, const Vec &v) {
+	return {k*v.x, k*v.y}; // This is valid cause the compiler is smart!!
+}
+
+Vec operator*(const Vec &v, int k) {
+	return k*v;
+}
+
+Eg2.
+
+struct Grade{
+	int mark;
+};
+
+I want to : cout << g;
+
+ostream &operator<<(ostream &out, const Grade &g) {
+	out << “Your grade: ” << g.mark << “%”;
+	return out;
+}
+
+I also want to : cin << g;
+
+istream &operator>>(istream &in, Grade &g) {
+	in >> g.mark;
+	if (g.mark < 0) g.mark = 0;
+	if (g.mark > 100) g.mark = 100;
+	return in;
+}
+
+C/C++ preprocessor: 
+
+- When you compile a program, the preprocessor runs before the compiler.
+- #_______ :preprocessor directive
+- #<____> look into the std library
+- #”_____” look into the current directory
+- g++14 -E -P file : this only run the 
+- #define VAR VALUE
+- The preprocessor will search for VAR and replace it with VALUE
+
+Conditional Compilation:
+
+- g++14 compiler has a -D command line option to give preprocessor directives.
+- use #if #elif #endif to do conditional compile!
+- Preprocessor code comment out nests nicely.
+- #ifdef VAR
+- #ifndef VAR
+
+Eg.
+
+$> g++14 -E -P -DVAR=VALUE <file>
+
+Comment:
+
+#if 0
+	#if 0
+	#endif
+#endif
+
+Separate Compilation:
+
+Check out separate/example1
+
+Interface: .h
+
+Implementation: .cc
+
+NEVER compile a header file!!
+
+1. g++14 *.cc
+2. g++14 main.cc vector.cc 
+3. (I would like to separately compile individual cc files to produce portions of the executable and then merge all the portions.)(By default, g++14 tries to compile link and produce executables)
+
+3. use $> g++ -c vector.cc // This will also produce .o files!! These are pieces of executables
+
+- Then use $> g++14 vector.o main.o
+- Link the pieces of the program
+- produces executables
+
+Global Variables:
+
+- use the “extern” key words
+- extern int global in .h;
+- Never include a .cc file;
+- Never compile a .h file;
+- I don’t want to track includes manually;
+- Never place “using namespace std;” in a header file;
+- instead use std::string, std::cout, etc
+
+abc.h
+
+	extern int global;
+
+abc.cc
+	int global; // declare and definition: here definition is not initialization 
+
+Classes:
+
+- Big idea in object oriented programming: place functions in side a struct;
+- A class is a struct that may contain functions;
+- There is a “class” keyword;
+- An instance of a class is called an object, a value of type student is a student object;
+- A function inside class is called a “member function” or “method”;
+- A method for class C can only be called using an object of class C;
+- Inside the method, the method has access to the fields of the object on which this method was called;
+
+EG.
+
+struct Student {
+	int assns, mt, final;
+	float grade() {
+		return 0.4 * assns + 0.2 * mt + 0.4 * final;
+	}
+}
+
+Student billy {60, 70, 75};
+
+cout << billy.grade() << endl;
+
+Function vs Method:
+
+- All methods have a hidden parameter named “this”;
+- “this” is a pointer to the object on which this method was called;
+- it is totally up to me whether to use “this”;
+
+Eg.
+
+struct Student {
+	int assns, mt, final;
+	float grade() {
+		return this->assns * 0.4 + this->mt * 0.2 + this->final * 0.4;
+	}
+}
+
+Student billy{60, 70, 80};
+
+// This is a C-style initialization: value must be constants;
+// C++ allows writing methods called constructors, which has 2 rules:
+- the function name is same as the class;
+- There is no return type;
+
+struct Student {
+	int assns, mt, final;
+	float grade(){…};
+	Student(int assns, int mt, int final) {
+		this->assns = assns;
+		this->mt = mt;
+		this->final = final;
+	}
+}
+
+	Student billy{60, 70, 80};
+
+- if a 3 parameters constructor exists, that is called. 
+- Otherwise use C-style initialization:
+
+	Student billy = Student{60, 70, 80};
+	Student billy = Student(60, 70 ,80);
+
+1. int x = 5; string s = “h”;
+2. int x(5); string s(“h”);
+3. int x{5}; string s{“h”};
+
+3 will always work!!
+
+
+Heap allocation:
+
+	Student *pBilly = new Student{60, 70, 80};
+
+Advantages of constructors:
+
+- full features of C++ available to function (if, for, while);
+- Overloading;
+- Default values;
+- Sanity checks/ class invariants;
+
+EG.
+
+struct Student {
+	int assns, mt, final;
+	float grade(){…};
+	Student(int assns = 0; int mt = 0; int fianl = 0) {
+		this->assns = assns < 0 ? 0 : assns;
+		this->mt = mt < 0 ? 0 : assns;
+		this->final = final < 0 ? 0 : final;
+	}
+}
+
+Then I could write :
+	Student billy2{60,70};
+	Student billy3{60};
+	Student billy4{};
+	Student billy5;
+
+Default Constructor:
+
+Every class comes with a default (0 parameter) constructors
+- it calls the default constructors on any fields that are objects
+
+struct A {
+	int x;
+	student y;
+	Vec *v;
+}
+
+A myA; //calls the default constructor 
+- y is default constructed
+- note that x and v have not been initialized;
+
+Vec v; // calls default constructor 
+- v has 2 int therefore not initialized;
+
+Rule: the default ctor goes away as soon as you implement any ctor.
+
+struct Vec{
+	int x, y;
+	Vec(int x, int y) {
+		this->x = x;
+		this->y = y;
+	}
+};
+
+Vec v; // will not compile;
+
+!! Fields that are constants or references 
+- must be initialized.
+
+struct Mystruct {
+	const int x = 5;
+	int &z = y;
+};
+
+This will be useless as all objects will have the same value.
+
+We want id to be a const for each Student Object. But each student gets a different id.
+
+Rule: fields must already be constructed before the ctor body runs.
+
+3 steps to object creation:
+1. space is allocated;
+2. fields are default constructed;
+3. constructors body runs;
+
+Lets hijack step 2 using:
+MIL(member initialization list)
+ EG>
+
+struct Student{
+	const int id;
+	int assns, mt, final;
+	Student(int id, int assns, int mt, int final) 
+		: id{id}, assns{assns}, mt{mt}, final{final} {}
+}
+
+- MIL can be used to initialize all fields 
+- In the MIL, for each pair the “thing” outside the braces {} must be a field.
+- inside the braces, the scoping rules apply.
+- MIL initializes fields in class declaration order.
+- Using an MIL can be more efficient than using the constructor body.
+- MIL replaces the default constructed.
+
+
+struct Vec{
+	int x = 5;
+	int y = 10;
+	Vec(int x, int y) : x{x}, y{y} {}
+};
+
+MIL has priority over in-class initialization;
+
+Copy constructor:
+
+Student billy{60, 70, 80};
+
+Student boby = billy;
+Student boby{billy};
+- This called the copy constructor;
+- A copy of the existing object is made;
+- A copy constructor is default defined;
+
+A class comes with 
+1. default constructor;
+2. copy constructor;
+3. copy assignment operator;
+4. destructor;
+5. move constructor;
+6. move assignment operator;
+
+struct Student { 	…
+	Student (const Student &other) : assns{others.assns}, mt{other.mt}, final{other.final} {}
+};
+
+Sometimes the default copy constructor is not what we want. 
+
+struct Node {
+	int data;
+	Node *next;
+	Node(int data, Node *next) 
+		: data{data}, next{next} {}
+	Node(const Node &other) 
+		: data{other.data}, next{other.next} {}
+
+Node *np = new Node{1, new Node{2, new Node{3, nullptr}}};
+
+Node n = *np;
+Node n{*np};
+Node *m = new Node{*np};
+
+If we don’t want nodes to be shared, we cannot use the copy constructors, and we must implement our own (deep copy) (when there is a class that has pointer to the heap);
+
+EG.
+
+struct Node{ 	…
+	Node(const Node &other){
+		data = other.data;
+		if (other.next) {
+			next = new Node{*other.next};
+		}
+		else {
+			next = nullptr;
+		}
+	}
+};
+
+struct Node{ 	…
+	Node(const Node &other) : 
+		data{other.data},
+		next{other.next ? new Node{*other.next} : nullptr} {}
+};
+
+Places where a copy constructor is called :
+1. constructing an object as a copy of another;
+2. pass by value;
+3. return by value;
+
+implicit conversions!!
+
+Node n = 4; // This will work.
+void foo(Node n ){…}
+foo(4)
+
+string str = “hello”
+- string class has a 1 parameter constructor of type char *;
+
+We can disable the automatic conversion by declaring explicit
+
+
+explicit Node(int n, Node  )
+
+TUT:
+
+- We can use Valgrind to find undefined behaviours and memory errors;
+- The distinction between struct and class is whether it has a function inside;
+- Default constructor = constructor with no argument;
+- compiler will provide a default constructor, but only provided if no user-defined constructor
+
+
+
+TUT ends;
+
+Destructor:
+
+- When an object is destroyed , the destructor runs;
+- stack allocated object are destroyed automatically when they go out of scope;
+- heap allocated objects are destroyed when we call delete on a ptr to the object;
+
+3 steps:
+
+1. destructor body runs;
+2. fields that are objects are destroyed(reverse of declaration order);
+3. space is deallocated.
+
+- A class has only one destructor;
+- The destructor of a class is named: ~ClassName();
+- A class comes with a default destructor;
+- calls destructors on fields that are objects;
+
+Eg.
+
+Node *np = new Node{1, new Node{2, new Node{3, nullptr}}};
+
+delete np;// This is destroying Node 1 with 2 and 3 still leaking;
+
+struct Node {
+	…
+	~Node(){
+		delete next; // THIS IS RECURSIVE!!! ????
+	}
+}
+
+!! You don’t really have to delete any other thins!!!
+
+Copy Assignment Operator:
+
+Student billy{60, 70, 80};
+Student bobby = billy; // copy constructor
+Student jane;
+jane = billy; // copy assignment operator;
+
+struct Node {
+	…
+	Node &operator=(const Node &other) {
+		this->data = other.data;
+		delete this->next;
+		this->next = other.next ? new Node(*other.next) : nullptr;
+		return *this;
+	}
+}
+
+Since the operator= updates an existing object, next might already be pointing to heap memory;
+
+Node n{1, new Node{2, nullptr}};
+
+n = n; // this is leaking memory;
+
+struct Node {
+	…
+	Node &operator=(const Node &other) {
+		if (this == &other) return *this;
+		this->data = other.data;
+		delete this->next;
+		this->next = other.next ? new Node(*other.next) : nullptr;
+		return *this;
+	}
+}
+
+struct Node {
+	…
+	Node &operator=(const Node &other) {
+		if (this == &other) return *this;
+		Node *tmp = this->next;
+		this->next = other.next ? new Node(*other.next) : nullptr;
+		delete tmp;
+		this->data = other.data;
+		return *this;
+	}
+}
+
+Implementing operator= using copy of swap;
+
+#include <utility>
+
+struct Node {
+	…
+	void swap(Node &other){
+		using std::swap;
+		swap(data, other.data);
+		swap(next, other.next);
+	}
+	Node &operator=(const Node &other) {
+		Node tmp = other;
+	}
+}
+
+!! PASS BY VALUE IS USING THE COPY CONSTRUCTOR
+
+EG.
+
+Node plusOne(Node n){
+	n.value += 1;
+	return n;
+}
+Node n{1, new Node{2, nullptr}};
+Node n2{plusOne(n)};
+
+This call the copy constructor 6 times!!
+
+To avoid copy something that is about to be destroyed, we write a move constructor.
+
+We want a way to be able to refer to temporary objects(something that is about to be destroyed).
+
+C++ has rvalue references (&&):
+- references to temporary objects.
+we can write a constructor which takes a Node && (Node rvalue referance) as a parameter.
+
+- Move constructor
+
+struct Node {
+	…
+	Node (Node &&other): data{other.data}, next{other.next} {
+		other.next = nullptr;
+	}
+}
+
+If we have this, we will call copy constructor 4 times and move constructor 1 times.
+
+Move assignment operator:
+
+struct Node{
+	…
+	Node &operator=(Node &&other) {
+		swap(other);
+		return *this;
+	}
+}
+
+You get a move constructor and move assignment operator for free:
+- Theses go away as soon as you implement any copy constructor, copy assignment oeprator, destructor, move assignment operator, move constructor.
+- If a move version of copy constructor and copy assignment operator is available, it is called when the RHS is a rvalue.
+
+Copy/Move Elision:
+node.cc — 4 * copy constructor;
+nodemove.cc — 2 copy constructor + 1 mock constructor;
+
+
+
+Vec makeAVec() { return {2, 3}; };
+
+Vec v=makeAVec();
+
+We would expect either a copy constructor or a move constructor to be called. But in fact the vec V is directly constructed with values {2, 3}.
+Compilers are allowed to omit 
+
+This is a good optimization but the compiler also avoid the side effects
+
+EGs in c++/elision/vec.cc
+
+To turn off optimization:
+use:
+g++14 -fno-elide-constructor (files).
+
+Rule of 5:
+If you need to implement a custom version of any of:
+1. copy constructor;
+2. copy assignment operator;
+3. destructor;
+4. move constructor;
+5. move assignment operator;
+!!! typically you need to implement all of them!!!
+
+Methods vs Standalone functions:
+- Operator overloading;
+- operator= must be implemented as a method;
+- LHS was represented by the “this” ptr;
+
+Implementing + and * for Vec as methods
+
+struct Vec {
+	int x,y;
+	Vec operator+(const Vec &v) {
+		return { x + v.x, y + v.y};
+	}
+	Vec operator*(const int k) { 		return { x*k , y*k};
+}
+
+this only works with v1+v2, v*5;
+
+to use 5*v
+we have to use a function;
+
+Implementing I/O operator does not go with intuition:
+ x << (v << cout);
+
+We are required to use methods :
+- operator=
+- operator[]
+- operator()
+- operator->
+- operatorT() // this means type;
+
+Arrays of Objects:
+struct Vec {
+	int x,y;
+	Vec(int x, int y): x{x}, y{y} {}
+}
+
+Vec v1[3]; // this won’t compile
+Vec *v2 = new Vec[3]; // this won’t compile
+Default constructor wen away as soon as we implemented our own constructor;
+
+FIX:
+1. provide default constructor;
+2. stack allocated arrays of objects -> can use array initialization: 
+Vec vec1[3] = {vec{0,0}, vec{1,2}, vec{3,4}};
+3. stack/heep
+- create array of pointers instead of objects;
+- Stack: Vec *vec3[10]; alloc
+- 
+- exiate array of Vec pointers;
+- Heap: Vec **vecs4 = new Vec*[10];
+                vecs4[0] = new Vec{2, 3};
+				heap allocated array containing heap allocated Vecs
+- to destroy:  
+
+
+Separate Compilation:
+Method headers go i the header file.
+Method implementation goes in the cc file.
+
+node.h
+#ifndef NODE_H
+#define NODE_H
+struct Node {
+	int data;
+	Node *next;
+	Node(int data, Node *next){}
+
+
+
+Const Method:
+
+Struct Student  {
+	int assns, mt, final;
+	float grade() const// does not compile without this!
+		{ return asana* 0.4 + mt*0.2 + final*0.4; }
+}
+
+const student billy {60, 70, 80};
+cout << billy.grade() << endl; // doesn’t compile without const????
+- because grade did not promise that it won’t change the field. 
+
+A const method does not modify the fields of the object on which the method was called.
+- the compiler will check for this;
+
+We can only call method that are const on const objects!!
+
+struct Student {
+	mutable int counter = 0;
+	float grade() const {
+		++counter;
+		return…;
+	}
+}
+
+Static fields & member functions:
+- static fields/functions are associated with the class and not any object of the class.
+- We do not need an object to access a static field as call a static member function.
+- static member functions do not have the “this“ pointer
+- static member functions can only access static fields and call other static member function.
+
+struct Student {
+	static int numObjects; // declaration!!
+	Student() {
+		…
+		++numObjects;
+	}
+	static int getCount() { return numObject;}
+}
+
+C++ Rule: static fields must be defined in an external file!!
+
+student.cc
+int Student::numObjects = 0;
+
+int main() {
+	Student s1{}, s2{};
+	cout << Student::numObject << endl;
+	cout << Student::getCount() << endl;
+}
+
+Invariants & Encapsulation:
+
+struct Node{
+	int data;
+	Node * next;
+	Node(int data, Node *next)…
+	~Node(){delete next;}
+}
+
+int main() {
+	Node n1{1, new Node{2, nullptr}};
+	Node n3{3, nullptr}; // deleting nullptr is fine.
+	Node n4{4, &n3}; // crashes because &n3 is in the stack.
+}
+
+When the main finishes, the destructors are called.
+
+Invariant: an assumption/statement that is supposed to be hold true, for the class to function correctly.
+
+Node class invariant:
+- next is either a nullptr or points to the heap;
+
+It is impossible to prevent clients from breaking the invariant as long as they have access to the class implementation!
+
+Stack invariant :
+- LIFO
+- if a client has access to the array containing stack contents the invariant cannot be guaranteed!
+
+Encapsulation: Treat the object in the class as a black boxes(a capsule).
+- Hide the implementation;
+- Allow clients access through a provided interface;
+
+Keywords: private/public
+private: what programmers have to know;
+public: what normal people wants to know;
+
+struct Vec {
+	// default visibility is public
+	Vec(int x, int y): x{x}, y{y} {}
+	private: // anything that follows is private from outside!
+		int x;
+		int y;
+	public: // change visibility to public
+		Vec operator+(…)
+};
+
+int main() {
+	Vec v{3, 4}; //2 param constructor is public, since structs have public visibility by default;
+	Vec v1 = v + v;
+	int num = v.x + v.y; // this cannot happen!!
+}
+
+Advice: at a minimum all fields should be private!!
+
+We have another keywords “class” which is identical to struct but the default visibility is private!
+
+EG.
+
+class Vec {
+	int x;
+	int y;
+
+public:
+	Vec(…)…
+	Vec operator+(…)…
+};
+
+All helper method should be private!!
+A helper method helps in functionality!!
+
+Guaranteeing the Node invariant:
+-> Create a List wrapper class
+
+list.h
+
+class List {
+	struct Node; // declaring a private, nested class
+	Node *thelist;
+	public:
+	void addToFront(int n);
+	int ith(int i);
+	~List();
+};
+
+list.cc
+
+struct List::Node {
+	int data;
+	Node *next;
+	Node(int data, Node *next): data{data}, next{next}{};
+	~Node(){delete next;}
+};
+
+List::~List(){ delete theList;};
+
+void List::addToFront
+
+!! To get the i th element, Tn = O(n^2) !!
+
+Create an O(n) traversal for the list.
+
+Iterator Design Pattern:
+
+- create a class(Iterator) that manages access to Nodes.
+- the class will act as an abstraction of a pointer into the linked list.
+
+Inspiration:
+// arr is an int array
+for (int *p=arr; p != arr + array.size; ++p) {
+	…*p…
+}
+
+TODO list:
+
+Iterator class should support
+- operator *
+- operator ++
+- operator != (==)
+- begin()
+- end()
+
+class List {
+	struct Node;
+	Node * theList = nullptr;
+	public:
+	class Iterator {
+		Node *curr;
+		public:
+		explicit Iterator(Node * curr): curr{curr} {}
+
+		int& operator*() cosnt{
+			return curr->data; // return by reference gives clients access to “data”
+		}
+		
+		Iterator &operator++() {// this is the syntax for prefix!!use as ++p
+			curr = curr->next;
+			return *this;
+		}
+
+		bool operator==(const Iterator &other) {
+			return (curr == other.curr);
+		}
+
+		bool operator!=(const Iterator &other) {
+			return !(*this == other);
+		}
+	}; // end Iterator
+
+	Iterator begin() {
+		return Iterator{theList};
+	}
+
+	Iterator end() {
+		return Iterator{nullptr};
+	}
+……
+}
+
+CLIENT CODE:
+
+int main() {
+	List lst;
+	lst.addToFront(1);
+	lst.addToFront(2);
+	lst.addToFront(3);
+	for (List::Iterator it = lst.begin(); it != lst.end(); ++it) {
+		cout << *it << endl;
+	}
+}
+
+“auto Keyword: automatic type deduction”
+
+auto x = y; // define a x as the same type as y;
+List::Iterator can be replaced by auto;
+
+We can use C++’s built in support for he Iterator Design Pattern:
+	Range-based for loops—
+for (auto n : lst) {
+	cout << n << end;
+}
+!!n is a copy!!
+The type of n is int : *it!!!
+
+A range-based for loop requires:
+1. class C implements begin() and end() which return iterator objects;
+2. the iterator class implements *, !=, ++
+
+Encapsulation (contd):
+	constructor for Iterator is public, which is bad!
+We want to make constructor in Iterator private.
+But List::begin and List::end use the constructor!!
+
+Friend:
+
+Iterator can declare List as a friend!!!
+
+class Iterator {
+	Node *curr;
+	explicit Iterator …//constructor;
+	……
+	friend class List; // give List all the access to the private area!!
+}
+
+MAKE AS FEW FRIENDS AS POSSIBLE!!
+
+Advice: make fields private!!
+Provide accesses/mutators!!
+
+Suppose:
+- Vec::x and Vec::y are private:
+- not get(x) or anything
+
+To implement an operator<<
+!! We can make operator << a friend !!
+
+System Modeling:
+
+UML: Unified Modelling language 
+
+【在这里插入图片】
+
+class Vec{
+	int x,y;
+	public:
+	Vec(int x, int y): x{x}, y{y} {}
+};
+
+
+class Basis{
+	Vec v1, v2;
+};
+
+Basis b won’t compile!!
+
+Fix:
+1. provide default actor for Vec;
+2. Use the MIL to call an alternate ctor;
+
+Basis::Basis(): v1{0, 1}, v2{2, 3} {}
+
+Composition(OWNS A): embedding an object inside another;
+
+Basis “owns a” Vec!!
+
+Typically class “A” owns a class “B” if :
+- B has no existence of its own;
+- if A is copied, B is copied(deep copy);
+- if A is destroyed, B is destroyed
+
+在这里插入图片
+
+Aggregation(HAS A): 
+
+Typically a class “A” has a class “B” 
+- B can exist on its own;
+- if we copy A, we don’t don’t copy B;
+- if we destroy A, we don’t destroy B;
+
+在这里插入图片
+
+implement using pointers.
+
+Inheritance(IS A): 
+
+class Book {
+	-tile
+	-author
+	-numPages
+}
+
+class Text {
+	-tile
+	-author
+	-numPages
+	-topic
+}
+
+class Comic {
+	-tile
+	-author
+	-numPages
+	-hero
+}
+
+!! A text is a Book with an extra topic field !!
+!! A Comic is a Book with an extra hero field !! 
+
+在这里插入图片
+
+Base class, parent class, superclass
+Derived class, child class, subclass
+
+A child class inherits members(fields, methods) from it s parents.
+!! Any method that you can call on a Book object, you can call on a Text/Comic !!
+
+Inheriting Private Members:
+
+subclasses inherit private fields/methods as well.
+Text has inherited title, author, numPages
+
+!!!Rule: Since title, author, numPages in private in Book, it is not accessible in Text!!!!
+
+Text t = …
+t.author// Won’t compile
+
+EG.
+
+class Book {
+	string title, author;
+	int numPages;
+	public: 
+	Book(string title, string author, int numPages) :
+		title{title}, author{author}, numPages{numPages} {}
+};
+
+class Text : public Book{ // won’t compile
+	string topic;
+	public:
+	Text(string title, string author……):
+		title……
+	{}
+}
+
+Why the Text for does not compile?? 
+1. title, author, numPages are private in Book
+2. even if these inherited fields were public, still won’t compile — Rule: the MIL for Text can only use fields it declared
+3. Steps for object construction —
+ 	1. space is allocated;
+	2. superclass past of the object is constructed;
+	3. field initialization for fields declared in the class;
+	4. ctor body;
+
+- The Text ctor won’t compile, because in step 2 of object construction the Book part is default cosntructed
+
+How to fix?
+1. provide default Book ctor;
+2. call a non-default actor in the MIL;
+
+Text::Text(string title, string author, int numPages, string topic) :
+	Book{title, author, numPages},
+	topic{topic} {}
+
+Protected visibility
+
+class Book {
+	protected:
+	string title, author;
+	int numPages;
+	public:
+	……
+}
+
+Protected members are accessible by the class but also the subclasses.
+The Text class could implement:
+void Text::addAuthor(string auth) {
+	author += auth;
+}
+Now I can access author in Text!!
+
+!! Protected breaks encapsulation !!
+
+ADVICE: Keep fields private, if needed give protected accessors or mutators
+
+Method Overriding Dynamic Dispatch
+
+Book: isHeavy: numPages > 300;
+Text: isHeavy: numPages >500;
+Comic: isHeavy: numPages > 30;
+
+class Book {
+	int numPages;
+	public;
+	int getNumPages() const {
+		return numPages;
+	}
+	bool isHeavy() const {
+		return numPages > 200;
+	}
+};
+
+class Comic: public Book {
+	……
+	public: 
+	bool isHeavy() const {
+		return getNumPages() > 30;
+	}
+};
+
+Book b{…};
+Comic c{…};
+b.isHeavy(); // Book::isHeavy
+c.isHeavy(); // Comic::isHeavy
+
+Book b2 = Comic(…, …, 40, …);
+
+b2.isHeavy(); // Book::isHeavy!!!
+
+When a subclass object is placed into a superclass variable, the subclass object is SLICED. — object coercion 
+
+Pointers to subclass Objects:
+
+Comic c{…, …, 40, …};
+
+Comic *cp{&c};
+cp->isHeavy(); // Comic::isHeavy;
+Book *bp{&c};
+bp->isHeavy(); // Book::isHeavy;
+
+RULE: compiler looks at the declared type of a pointer to choose which method will execute. (static dispatch)
+— decision is made at compile time.
+
+This is not what we want typically!! We want to use a book pointer to point at all the objects that can be classified as a book!!
+
+KEYWORD: virtual
+
+class Book {
+	…
+	public:
+	virtual bool isHeavy() const {…}
+};
+
+class Comic : public Book {
+	public:
+	bool isHeavy() const override {…}
+};
+
+Comic c{…, …, 40, …};
+
+Comic *cp{&c};
+Book *bp{&c};
+Book &rb{c};
+
+cp->isHeavy; // comic
+bp->isHeavy; // comic
+rb.isHeavy; // comic
+
+virtual: For virtual method, the decision of which method to call is delayed till the program is running
+During execution, the runtime type of the object is used to choose the method.
+
+Book *collection[20]; 
+
+for (int i = 0; i < 20; i++) {
+	collection[i]->isHeavy;
+}
+
+collection — Polymorphic array
+
+polymorphism: ability to accommodate multiple types under one abstraction;
+
+ostream &operator<<(ostream &out; Class &c) {
+	……
+}
+We can send ostream(cout) as a variable of ofstream IS A stream, ostringstream IS A ostream.
+
+Destructor Revisited:
+
+inheritance/examples
+class X {
+	int *x;
+	public:
+	X(int n): x{new int[n]} {}
+	~X() {delete [] x}
+};
+
+class Y : public X{
+	int *y;
+	public:
+	Y(int n, int m) : X{n}, y {new int[m]} {}
+	~Y() {delete [] y;}
+};
+
+~Y() should not worry about fields inherited from X;
+
+RULE: when a subclass object is destroyed, the superclass door is automatically called.
+
+X *myx = new Y{10, 20};
+delete mix; // memory leak!!
+
+solution: virtual
+
+Advice: If a class may have subclasses, make the dtor virtual.
+- even if the base class does not need to do anything in the dtor;
+
+If a class does not allow subclasses to be created, use the “final” keyword :
+class B final : public A {
+	……
+};
+
+class Student {
+	……
+	public:
+	virtual int fees() = 0; // P.V. method
+};
+
+class Coop: public Student {
+	……
+	public:
+	int fees() override {…}
+};
+
+class Regular : public Student {
+	public:
+	int  fees() override {…}
+};
+
+We want Student::fees to not have an implementation:
+	!! PURE VIRTUAL FUNCTION !!
+
+VIRTUAL:
+- classes may override behaviour
+PURE VIRTUAL:
+- subclasses must define behaviour
+
+Student does not have a complete implementation
+- c++ will not allow creation of instances/objects of an incomplete class
+
+!! A class with at least one P.V. method is an abstract class
+- A subclass of an abstract class is also abstract, unless it implements all P.V. methods
+- A class with no P.V. methods is called “concrete”
+
+Use abstract classes to 
+- organize subclasses
+- common place to put common fields and methods
+- Polymorphism
+
+Virtual P.V. name in italics
+Abstract italics
+static underline
 
