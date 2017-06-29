@@ -2298,5 +2298,50 @@ static underline
 
 TUT starts:
 
-  
+Composition(OWNS A): A owns B => if A deleted, B deleted
+Aggregation(HAS A)
+Inheritance(IS A): B is a A => can use B whenever asking for A
 
+class B {...};
+class A {
+	B b; // composition
+	B *pb; // composition or aggregation
+};
+
+
+class A {
+	int a;
+	A(int a) : a{a} {}
+};
+class B : public A {
+	int b;
+	public:
+	B(int a, int b) : A{a}, b{b} {} // have to call a ctor in the MIL
+};
+class C {
+	protected:
+	... // visible in itself and subclass
+};
+protected breaks invariance
+
+Polymorphism:
+
+B b{1, 2};
+A a = b; // only part of this is copied "sliced"
+// This is object coercion
+A *pa = new B{3,4}; // B is not sliced!!!
+void foo(A a);
+void foo2(A &a);
+foo(b); // Sliced because of A copy ctor
+foo2(a); // 
+
+void foo(A *arr) {
+	arr[0] = A{10};
+	arr[1] = A{7};
+}
+B arr[2] = {{1, 2}, {3, 4}};
+foo(arr); // Dangerous
+
+NEVER USE ARRAY OF OBJECTS POLYMORPHICALLY!!
+
+TUT ends
